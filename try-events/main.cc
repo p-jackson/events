@@ -15,7 +15,7 @@ class Events :
 {
 };
 
-TEST_CASE("Listeners are called when events are triggered") {
+TEST_CASE("Listeners are called when events are emitted") {
   auto count = 0;
   
   Events e;
@@ -23,7 +23,7 @@ TEST_CASE("Listeners are called when events are triggered") {
 
   REQUIRE(count == 0);
 
-  e.trigger<"void1"_e>();
+  e.emit<"void1"_e>();
 
   REQUIRE(count == 1);
 }
@@ -36,12 +36,12 @@ TEST_CASE("`addListener` is an alias for `on`") {
 
   REQUIRE(count == 0);
 
-  e.trigger<"void1"_e>();
+  e.emit<"void1"_e>();
 
   REQUIRE(count == 1);
 }
 
-TEST_CASE("Correct listeners are called when events are triggered") {
+TEST_CASE("Correct listeners are called when events are emitted") {
   auto void1 = 0;
   auto void2 = 0;
 
@@ -52,18 +52,18 @@ TEST_CASE("Correct listeners are called when events are triggered") {
   REQUIRE(void1 == 0);
   REQUIRE(void2 == 0);
 
-  e.trigger<"void1"_e>();
+  e.emit<"void1"_e>();
 
   REQUIRE(void1 == 1);
   REQUIRE(void2 == 0);
 
-  e.trigger<"void2"_e>();
+  e.emit<"void2"_e>();
 
   REQUIRE(void1 == 1);
   REQUIRE(void2 == 1);
 }
 
-TEST_CASE("Events can be triggered with primitive type arguments") {
+TEST_CASE("Events can be emitted with primitive type arguments") {
   auto value = 0;
 
   Events e;
@@ -71,11 +71,11 @@ TEST_CASE("Events can be triggered with primitive type arguments") {
 
   REQUIRE(value == 0);
 
-  e.trigger<"int"_e>(113);
+  e.emit<"int"_e>(113);
 
   REQUIRE(value == 113);
 
-  e.trigger<"int"_e>(-112);
+  e.emit<"int"_e>(-112);
 
   REQUIRE(value == 1);
 }
@@ -91,8 +91,21 @@ TEST_CASE("The adding of listeners can be chained") {
   REQUIRE(count1 == 0);
   REQUIRE(count2 == 1);
 
-  e.trigger<"void1"_e>();
+  e.emit<"void1"_e>();
 
   REQUIRE(count1 == 1);
   REQUIRE(count2 == 2);
+}
+
+TEST_CASE("`emit` returns true if event had listeners") {
+  Events e;
+  e.on<"void1"_e>([] {});
+
+  REQUIRE(e.emit<"void1"_e>());
+  REQUIRE_FALSE(e.emit<"void2"_e>());
+
+  e.on<"void2"_e>([] {});
+
+  REQUIRE(e.emit<"void1"_e>());
+  REQUIRE(e.emit<"void2"_e>());
 }

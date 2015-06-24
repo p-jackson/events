@@ -87,10 +87,16 @@ public:
   }
 
   template<EventName name, typename... Args>
-  void trigger(Args&&... args) {
+  bool emit(Args&&... args) {
     using Tag = std::integral_constant<EventName, name>;
-    for (auto& listener : get(Tag{}))
+
+    // Take a copy of the list, because a listener may add or remove
+    // other listeners.
+    auto listeners = get(Tag{});
+    for (auto& listener : listeners)
       listener(std::forward<Args>(args)...);
+
+    return !listeners.empty();
   }
 };
 
