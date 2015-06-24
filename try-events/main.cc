@@ -15,7 +15,7 @@ class Events :
 {
 };
 
-TEST_CASE("Callbacks are called when events are triggered") {
+TEST_CASE("Listeners are called when events are triggered") {
   auto count = 0;
   
   Events e;
@@ -28,7 +28,7 @@ TEST_CASE("Callbacks are called when events are triggered") {
   REQUIRE(count == 1);
 }
 
-TEST_CASE("Correct callbacks are called when events are triggered") {
+TEST_CASE("Correct listeners are called when events are triggered") {
   auto void1 = 0;
   auto void2 = 0;
 

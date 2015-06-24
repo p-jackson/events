@@ -17,15 +17,15 @@ inline constexpr EventName calcEventName(const char* s, EventName l) {
 }
 
 template<EventName, class... Decls>
-struct FindCBType { using type = void; };
+struct FindListener { using type = void; };
 
 template<EventName name, class Decl, class... Decls>
-struct FindCBType<name, Decl, Decls...> {
+struct FindListener<name, Decl, Decls...> {
   using A = std::integral_constant<EventName, name>;
   using B = std::integral_constant<EventName, Decl::name>;
   using type = std::conditional_t<std::is_same<A, B>::value,
     typename Decl::type,
-    typename FindCBType<name, Decls...>::type
+    typename FindListener<name, Decls...>::type
   >;
 };
 
@@ -40,20 +40,20 @@ template<class Decl, class... Decls>
 class EventStore<Decl, Decls...> : public EventStore<Decls...> {
 
   using Tag = std::integral_constant<EventName, Decl::name>;
-  using Callback = typename Decl::type;
+  using Listener = typename Decl::type;
 
-  std::vector<Callback> callbacks;
+  std::vector<Listener> listeners;
 
 public:
   using EventStore<Decls...>::add;
   using EventStore<Decls...>::get;
 
-  void add(Tag, Callback callback) {
-    callbacks.push_back(std::move(callback));
+  void add(Tag, Listener listener) {
+    listeners.push_back(std::move(listener));
   }
 
-  std::vector<Callback>& get(Tag) {
-    return callbacks;
+  std::vector<Listener>& get(Tag) {
+    return listeners;
   }
 };
 
@@ -71,20 +71,20 @@ template<class... Declarations>
 class EventEmitter : private detail::EventStore<Declarations...> {
 
   template<EventName n>
-  using CallbackType = typename detail::FindCBType<n, Declarations...>::type;
+  using ListenerType = typename detail::FindListener<n, Declarations...>::type;
 
 public:
   template<EventName name>
-  void on(CallbackType<name> callback) {
+  void on(ListenerType<name> listener) {
     using Tag = std::integral_constant<EventName, name>;
-    add(Tag{}, std::move(callback));
+    add(Tag{}, std::move(listener));
   }
 
   template<EventName name, typename... Args>
   void trigger(Args... args) {
     using Tag = std::integral_constant<EventName, name>;
-    for (auto& callback : get(Tag{}))
-      callback(std::forward<Args>(args)...);
+    for (auto& listener : get(Tag{}))
+      listener(std::forward<Args>(args)...);
   }
 };
 
