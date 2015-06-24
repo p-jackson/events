@@ -67,7 +67,7 @@ constexpr EventName operator"" _e(const char* s, std::size_t len) {
 
 } // namespace literals
 
-template<class... Declarations>
+template<class T, class... Declarations>
 class EventEmitter : private detail::EventStore<Declarations...> {
 
   template<EventName n>
@@ -75,9 +75,10 @@ class EventEmitter : private detail::EventStore<Declarations...> {
 
 public:
   template<EventName name>
-  void on(ListenerType<name> listener) {
+  T& on(ListenerType<name> listener) {
     using Tag = std::integral_constant<EventName, name>;
     add(Tag{}, std::move(listener));
+    return *static_cast<T*>(this);
   }
 
   template<EventName name, typename... Args>

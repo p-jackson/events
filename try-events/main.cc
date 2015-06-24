@@ -7,7 +7,7 @@ using namespace events;
 using namespace events::literals;
 
 class Events :
-  public EventEmitter<
+  public EventEmitter<Events,
     Declaration<"void1"_e, void()>,
     Declaration<"void2"_e, void()>,
     Declaration<"int"_e, void(int)>
@@ -65,4 +65,21 @@ TEST_CASE("Events can be triggered with primitive type arguments") {
   e.trigger<"int"_e>(-112);
 
   REQUIRE(value == 1);
+}
+
+TEST_CASE("The adding of listeners can be chained") {
+  auto count1 = 0;
+  auto count2 = 1;
+
+  Events e;
+  e.on<"void1"_e>([&count1] { ++count1; })
+   .on<"void1"_e>([&count2] { ++count2; });
+
+  REQUIRE(count1 == 0);
+  REQUIRE(count2 == 1);
+
+  e.trigger<"void1"_e>();
+
+  REQUIRE(count1 == 1);
+  REQUIRE(count2 == 2);
 }
