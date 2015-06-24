@@ -28,6 +28,19 @@ TEST_CASE("Listeners are called when events are triggered") {
   REQUIRE(count == 1);
 }
 
+TEST_CASE("`addListener` is an alias for `on`") {
+  auto count = 0;
+
+  Events e;
+  e.addListener<"void1"_e>([&count] { ++count; });
+
+  REQUIRE(count == 0);
+
+  e.trigger<"void1"_e>();
+
+  REQUIRE(count == 1);
+}
+
 TEST_CASE("Correct listeners are called when events are triggered") {
   auto void1 = 0;
   auto void2 = 0;

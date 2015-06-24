@@ -82,6 +82,11 @@ public:
   }
 
   template<EventName name, typename... Args>
+  T& addListener(Args&&... args) {
+    return on<name>(std::forward<Args>(args)...);
+  }
+
+  template<EventName name, typename... Args>
   void trigger(Args... args) {
     using Tag = std::integral_constant<EventName, name>;
     for (auto& listener : get(Tag{}))
