@@ -17,7 +17,7 @@ class Events :
 
 TEST_CASE("Listeners are called when events are emitted") {
   auto count = 0;
-  
+
   Events e;
   e.on<"void1"_e>([&count] { ++count; });
 
